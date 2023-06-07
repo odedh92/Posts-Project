@@ -1,0 +1,9 @@
+mat-form-field,textarea{
+  width: 100%;
+}
+#savePost{
+  margin: 1rem;
+}
+mat-spinner{
+  margin: auto;
+}
