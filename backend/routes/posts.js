@@ -26,7 +26,7 @@ const storage = multer.diskStorage({
 });
 
 
-router.post("",multer({storage:storage}).single('image'), (req, res, next) => {
+router.post("", multer({ storage: storage }).single('image'), (req, res, next) => {
   const url = req.protocol + '://' + req.get('host');
   const post = new Post({
     title: req.body.title,
@@ -36,17 +36,31 @@ router.post("",multer({storage:storage}).single('image'), (req, res, next) => {
   post.save().then(createdPost => {
     res.status(201).json({
       message: "Post added successfully",
-      post: {...createdPost,
-        id:createdPost._id}
+      post: {
+        ...createdPost,
+        id: createdPost._id
+      }
     });
   });
 });
 
 router.get('', (req, res, next) => {
-  Post.find().then(documents => {
+  const pageSize = +req.query.pagesize
+  const currentPage = +req.query.page
+  const postQuery = Post.find()
+  let fetchedPosts;
+  if (pageSize && currentPage) {
+    postQuery.skip(pageSize * (currentPage - 1))
+    .limit(pageSize)
+  }
+  postQuery.then(documents => {
+    fetchedPosts = documents;
+    return Post.count();
+  }).then(count => {
     res.status(200).json({
       message: 'Posts fetched successfully',
-      posts: documents
+      posts: fetchedPosts,
+      maxPosts:count
     })
   });
 });
@@ -68,9 +82,9 @@ router.delete('/:id', (req, res, next) => {
   })
 });
 
-router.put('/:id', multer({storage:storage}).single('image'), (req, res, next) => {
+router.put('/:id', multer({ storage: storage }).single('image'), (req, res, next) => {
   let imagePath = req.body.imagePath;
-  if(req.file){
+  if (req.file) {
     const url = req.protocol + '://' + req.get('host');
     imagePath = url + "/images/" + req.file.filename;
   }
