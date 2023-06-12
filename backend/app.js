@@ -1,10 +1,10 @@
+const path = require('path');
 const express = require('express');
 const bodyParser = require('body-parser');
 const postsRoutes = require('./routes/posts');
 const mongoose = require('mongoose');
 
 const app = express();
-
 
 mongoose.connect("mongodb+srv://odedh92:asdfghjkl1@cluster0.8lksl6j.mongodb.net/?retryWrites=true&w=majority")
   .then(() => {
@@ -16,6 +16,7 @@ mongoose.connect("mongodb+srv://odedh92:asdfghjkl1@cluster0.8lksl6j.mongodb.net/
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
+app.use("/images",express.static(path.join("backend/images")))
 
 app.use((req, res, next) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -23,6 +24,6 @@ app.use((req, res, next) => {
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST,PATCH,PUT, DELETE, OPTIONS');
   next();
 })
-app.use("/api/posts",postsRoutes)
+app.use("/api/posts", postsRoutes)
 
 module.exports = app;
