@@ -26,6 +26,7 @@ export class PostsService {
               content: post.content,
               id: post._id,
               imagePath: post.imagePath,
+              creator: post.creator
             };
           });
           return { posts: transformedPosts, maxPosts: postData.maxPosts };
@@ -39,9 +40,8 @@ export class PostsService {
       });
   }
   getPost(id: string) {
-    // const post = this.posts.find((p) => p.id === id);
-    // return { ...post } as Post;
     return this.http.get<{
+      creator: string;
       _id: string;
       title: string;
       content: string;
@@ -75,6 +75,7 @@ export class PostsService {
       title: title,
       content: content,
       imagePath: '',
+      creator:  ''
     };
     if (typeof(image) === 'object') {
       postData = new FormData();
@@ -88,6 +89,7 @@ export class PostsService {
         title: title,
         content: content,
         imagePath: image as string,
+        creator: ''
       };
     }
     this.http
