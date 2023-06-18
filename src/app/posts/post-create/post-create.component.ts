@@ -5,6 +5,8 @@ import { PostsService } from '../posts.service';
 import { ActivatedRoute, ParamMap } from '@angular/router';
 import { Post } from '../post.model';
 import { mimeType } from './mime-type-validator';
+import { Subscription } from 'rxjs';
+import { AuthService } from 'src/app/auth/auth.service';
 
 @Component({
   selector: 'app-post-create',
@@ -20,13 +22,17 @@ export class PostCreateComponent implements OnInit {
   form!: FormGroup;
   private mode = 'create';
   private postId: string | undefined;
-
+  private authStatusSub: Subscription | undefined;
   constructor(
     public postsService: PostsService,
-    public route: ActivatedRoute
+    public route: ActivatedRoute,
+    private authService: AuthService
   ) {}
 
   ngOnInit() {
+    this.authStatusSub = this.authService.getAuthStatuslistener().subscribe(authStatus =>{
+      this.isLoading = false
+    })
     this.form = new FormGroup({
       title: new FormControl(null, {
         validators: [Validators.required, Validators.minLength(3)],
@@ -49,12 +55,12 @@ export class PostCreateComponent implements OnInit {
             title: postData.title,
             content: postData.content,
             imagePath: postData.imagePath,
-            creator: postData.creator
+            creator: postData.creator,
           };
           this.form.setValue({
             title: this.post.title,
             content: this.post.content,
-            image:this.post.imagePath
+            image: this.post.imagePath,
           });
         });
       } else {
@@ -69,7 +75,11 @@ export class PostCreateComponent implements OnInit {
     }
     this.isLoading = true;
     if (this.mode === 'create') {
-      this.postsService.addPost(this.form.value.title, this.form.value.content, this.form.value.image);
+      this.postsService.addPost(
+        this.form.value.title,
+        this.form.value.content,
+        this.form.value.image
+      );
     } else {
       this.postsService.updatePost(
         this.postId || '',
